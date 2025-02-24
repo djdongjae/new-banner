@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- iOS 자동 링크 방지 -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="date=no">
+    <meta name="format-detection" content="address=no">
+    <meta name="format-detection" content="email=no">
+
+    <!-- favicon 적용 -->
+    <link rel="icon" href="./img/icon_regular.png">
+
+    <!-- 스타일시트 적용 -->
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/common.css">
+    <link rel="stylesheet" href="./css/index.css">
+
+    <title>유아 교육 업계 1위, KIDKIDS</title>
+</head>
+<body>
+<div id="root">
+    <!-- 네비게이션 -->
+    <div class="nav_container">
+        <nav class="nav">
+            <a class="nav_logo" href="#">
+                <img class="logo" src="./img/icon_word.png" alt="EK 로고">
+            </a>
+            <div class="navbar_Loginwrapper">
+                <a href="#" class="nav_list">전체 메뉴</a>
+                <a href="#" class="nav_list">로그인</a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="content">
+        <section class="section_cba">
+            <div class="cba_top">
+                <img class="cba_img" src="./img/background1.jpg" alt="학습장 배경">
+                <div class="cba_content">
+                    <div class="headline_contain">
+                        <h2>국내 유아 교육 업계 1위,</h2>
+                        <h1>KIDKIDS</h1>
+                    </div>
+                </div>
+                <button type="button" class="scroll_down" id="scroll_down"></button>
+            </div>
+            <div class="cba_bottom">
+                <p>
+                    아이들의 첫 배움, <br>
+                    한 명의 아이도 소중히, 선생님과 부모님을 위한 최고의 파트너, <br>
+                    키드키즈에서 놓치는 거 없이 다 누려보세요.
+                </p>
+            </div>
+        </section>
+
+        <section class="section_subintro">
+            <div class="container_subintro">
+                <div class="wrap_subintro">
+                    <div class="headline_sub js-scroll slide-left">
+                        <h1 class="ft36gr">키드키즈몰</h1>
+                        <p>유아 교구의 모든 상품을<br> 키드키즈몰에 모았어요.</p>
+                    </div>
+                    <div class="img_sub js-scroll fade-in-bottom">
+                        <img class="logo" src="./img/list_apple.png" alt="리스트">
+                    </div>
+                </div>
+                <div class="wrap_subintro">
+                    <div class="img_sub js-scroll fade-in-bottom">
+                        <img class="logo" src="./img/heart_apple.png" alt="찜">
+                    </div>
+                    <div class="headline_sub js-scroll slide-right">
+                        <h1 class="ft36gr">학습자료</h1>
+                        <p>25년간 축적된 30만개의<br>학습자료를 마음껏 누려보세요.</p>
+                    </div>
+                </div>
+                <div class="wrap_subintro">
+                    <div class="headline_sub js-scroll slide-left">
+                        <h1 class="ft36gr">도란도란</h1>
+                        <p>현직 유아교육종사자들의 <br> 생생한 업계 이야기까지.</p>
+                    </div>
+                    <div class="img_sub js-scroll fade-in-bottom">
+                        <img class="logo" src="./img/review_apple.png" alt="리뷰">
+                    </div>
+                </div>
+                <div class="wrap_subintro">
+                    <div class="img_sub js-scroll fade-in-bottom">
+                        <img class="logo" src="./img/heart_apple2.png" alt="찜">
+                    </div>
+                    <div class="headline_sub js-scroll slide-right">
+                        <h1 class="ft36gr">월간유아</h1>
+                        <p>40년 전통의 유아 전문 잡지,<br>유아 교육의 최신 흐름을 파악!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section_end">
+            <div class="section_end_inner">
+                <h1>국내 유아 교육 업계 1위, 키드키즈</h1>
+                <h2>지금 바로 모든 서비스를 즐기고 싶다면?</h2>
+                <a href="https://www.kidkids.net/">
+                    <button class="cba_btn">
+                        <span>키드키즈 바로가기</span>
+                    </button>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- 푸터 -->
+    <div class="footer_container">
+        <footer class="footer">
+            <div class="copyright">
+                <h2>키드키즈</h2>
+                <div class="copyright_content">
+                    <span>Contact</span>
+                    <span>djoh@kidkids.net</span>
+                </div>
+                <div class="copyright_content">
+                    <span>Copyright</span>
+                    <span>Kidkids. All rights reserved</span>
+                </div>
+            </div>
+            <div class="hakseubjang">
+                <a class="ft14-fw600" href="#">이용약관</a>
+                <a class="ft14-fw600" href="#">개인정보처리방침</a>
+                <a class="ft14-fw600" href="#">서비스소개</a>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- 스크롤 버튼 기능 -->
+<script src="./js/scroll.js"></script>
+<script>
+    document.querySelector('#scroll_down').addEventListener('click', function() {
+        window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+    });
+</script>
+</body>
+</html>
