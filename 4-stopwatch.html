@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏰ 스탑워치 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stopwatch-display {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 4rem;
+            font-weight: bold;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.3);
+            border: 5px solid #1a252f;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .target-time {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .target-time h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .target-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .stop-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #6c5ce7, #5f3dc4);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .result.neutral {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 3px solid #ffeaa7;
+            box-shadow: 0 5px 15px rgba(133, 100, 4, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .instructions {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .accuracy-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .accuracy-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-width: 120px;
+            margin: 5px;
+        }
+
+        .accuracy-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .accuracy-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .jackpot-animation {
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(21, 87, 36, 0.4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">⏰ 스탑워치 게임</h1>
+        
+        <div class="instructions">
+            <h3>🎯 게임 방법</h3>
+            <p>1. 목표 시간을 기억하세요</p>
+            <p>2. 시작 버튼을 눌러 스탑워치를 시작하세요</p>
+            <p>3. 목표 시간에 가깝게 멈춰보세요!</p>
+            <p>4. 정확할수록 높은 점수를 획득할 수 있어요</p>
+        </div>
+
+        <div class="target-time">
+            <h3>🎯 목표 시간</h3>
+            <div class="target-display" id="targetTime">00:00.00</div>
+        </div>
+
+        <div class="stopwatch-display" id="stopwatchDisplay">
+            00:00.00
+        </div>
+
+        <div class="game-controls">
+            <button class="control-btn start-btn" id="startBtn" onclick="startStopwatch()">시작</button>
+            <button class="control-btn stop-btn" id="stopBtn" onclick="stopStopwatch()" disabled>멈춤</button>
+            <button class="control-btn reset-btn" id="resetBtn" onclick="resetStopwatch()">리셋</button>
+        </div>
+
+        <div class="accuracy-display">
+            <div class="accuracy-item">
+                <div class="accuracy-value" id="accuracy">0%</div>
+                <div class="accuracy-label">정확도</div>
+            </div>
+            <div class="accuracy-item">
+                <div class="accuracy-value" id="difference">0.00초</div>
+                <div class="accuracy-label">차이</div>
+            </div>
+            <div class="accuracy-item">
+                <div class="accuracy-value" id="score">0점</div>
+                <div class="accuracy-label">점수</div>
+            </div>
+        </div>
+        
+        <div class="result" id="result">
+            스탑워치 게임을 시작하세요! ⏰<br>
+        </div>
+    </div>
+
+    <script>
+        let startTime = 0;
+        let currentTime = 0;
+        let isRunning = false;
+        let intervalId = null;
+        let targetTime = 0;
+        let gameStarted = false;
+
+        function generateTargetTime() {
+            // 3초에서 10초 사이의 랜덤한 목표 시간 생성
+            targetTime = Math.random() * 7000 + 3000; // 3초~10초 (밀리초)
+            const targetDisplay = document.getElementById('targetTime');
+            targetDisplay.textContent = formatTime(targetTime);
+        }
+
+        function formatTime(milliseconds) {
+            const totalSeconds = milliseconds / 1000;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = Math.floor(totalSeconds % 60);
+            const centiseconds = Math.floor((milliseconds % 1000) / 10);
+            
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+        }
+
+        function startStopwatch() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            gameStarted = true;
+            startTime = Date.now();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = true;
+            
+            const result = document.getElementById('result');
+            result.textContent = '목표 시간을 기억하고 정확한 타이밍에 멈춰보세요!';
+            result.className = 'result neutral';
+            
+            intervalId = setInterval(updateDisplay, 10);
+        }
+
+        function stopStopwatch() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            clearInterval(intervalId);
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = false;
+            
+            calculateResult();
+        }
+
+        function resetStopwatch() {
+            isRunning = false;
+            clearInterval(intervalId);
+            
+            currentTime = 0;
+            gameStarted = false;
+            
+            document.getElementById('stopwatchDisplay').textContent = '00:00.00';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = false;
+            
+            document.getElementById('accuracy').textContent = '0%';
+            document.getElementById('difference').textContent = '0.00초';
+            document.getElementById('score').textContent = '0점';
+            
+            const result = document.getElementById('result');
+            result.textContent = '스탑워치 게임을 시작하세요! ⏰';
+            result.className = 'result';
+            
+            generateTargetTime();
+        }
+
+        function updateDisplay() {
+            currentTime = Date.now() - startTime;
+            document.getElementById('stopwatchDisplay').textContent = formatTime(currentTime);
+        }
+
+        function calculateResult() {
+            const difference = Math.abs(currentTime - targetTime);
+            const accuracy = Math.max(0, 100 - (difference / targetTime) * 100);
+            const score = Math.max(0, Math.floor(1000 - difference / 10));
+            
+            document.getElementById('accuracy').textContent = Math.round(accuracy) + '%';
+            document.getElementById('difference').textContent = (difference / 1000).toFixed(2) + '초';
+            document.getElementById('score').textContent = score + '점';
+            
+            const result = document.getElementById('result');
+            
+            if (accuracy >= 95) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 완벽합니다! 50% 할인 쿠폰을 획득했습니다!';
+                showCoupon(50);
+                result.classList.add('jackpot-animation');
+            } else if (accuracy >= 90) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 훌륭합니다! 30% 할인 쿠폰을 획득했습니다!';
+                showCoupon(30);
+            } else if (accuracy >= 80) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 좋습니다! 20% 할인 쿠폰을 획득했습니다!';
+                showCoupon(20);
+            } else if (accuracy >= 70) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 괜찮습니다! 10% 할인 쿠폰을 획득했습니다!';
+                showCoupon(10);
+            } else if (accuracy >= 50) {
+                result.className = 'result neutral';
+                result.innerHTML = '😊 아쉽지만 5% 할인 쿠폰을 획득했습니다!';
+                showCoupon(5);
+            } else {
+                result.className = 'result lose';
+                result.innerHTML = '😢 아쉽게도 꽝입니다. 다시 도전해보세요!';
+            }
+            
+            // 무제한 참여 가능
+        }
+
+        function showCoupon(discount) {
+            const result = document.getElementById('result');            
+            // 쿠폰 코드 alert 표시
+            setTimeout(() => {
+                const couponCode = generateCouponCode();
+                alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${discount}%`);
+                location.reload();
+            }, 1000);
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            generateTargetTime();
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                if (isRunning) {
+                    stopStopwatch();
+                } else if (!gameStarted) {
+                    startStopwatch();
+                }
+            } else if (e.key === 'r' || e.key === 'R') {
+                resetStopwatch();
+            } else if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

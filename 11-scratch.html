@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎫 즉석 복권</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffecd2, #fcb69f);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .scratch-card {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scratch-area {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            border-radius: 15px;
+            position: relative;
+            cursor: crosshair;
+            overflow: hidden;
+            border: 3px solid #1a252f;
+        }
+
+        .scratch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border-radius: 12px;
+            transition: opacity 0.3s ease;
+        }
+
+        .scratch-overlay.scratched {
+            opacity: 0;
+        }
+
+        .scratch-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 40% 60%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px, 25px 25px, 30px 30px;
+        }
+
+        .card-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card-content.revealed {
+            opacity: 1;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .card-discount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .scratch-btn {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .scratch-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .scratch-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .scratch-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .result.neutral {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 3px solid #ffeaa7;
+            box-shadow: 0 5px 15px rgba(133, 100, 4, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .instructions {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .jackpot-animation {
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(21, 87, 36, 0.4);
+            }
+        }
+
+        .scratch-effect {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: transparent;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .scratch-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 8px, rgba(0,0,0,0.1) 8px);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">🎫 즉석 복권</h1>
+        
+        <div class="instructions">
+            <h3>🎯 게임 방법</h3>
+            <p>1. 스크래치 버튼을 눌러 복권을 시작하세요</p>
+            <p>2. 마우스로 스크래치 영역을 긁어보세요</p>
+            <p>3. 숨겨진 상품을 확인해보세요!</p>
+            <p>4. 운이 좋으면 대박 쿠폰을 획득할 수 있어요</p>
+        </div>
+
+        <div class="scratch-card">
+            <div class="scratch-area" id="scratchArea">
+                <div class="scratch-overlay" id="scratchOverlay">
+                    <div class="scratch-pattern"></div>
+                </div>
+                <div class="card-content" id="cardContent">
+                    <div class="card-icon" id="cardIcon">🎁</div>
+                    <div class="card-text" id="cardText">축하합니다!</div>
+                    <div class="card-discount" id="cardDiscount">20% 할인</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="scratch-btn" id="scratchBtn" onclick="startScratch()">스크래치 시작!</button>
+        
+        <div class="result" id="result">
+            스크래치 복권을 시작하세요! 🎫<br>
+            <small>마우스로 스크래치 영역을 긁어보세요!</small>
+        </div>
+    </div>
+
+    <script>
+        let isScratching = false;
+        let isScratched = false;
+        let scratchProgress = 0;
+        let scratchThreshold = 30; // 30% 긁어야 결과 공개
+        
+        const prizes = [
+            { 
+                icon: '🏆', 
+                text: '대박!', 
+                discount: '50% 할인', 
+                type: 'jackpot',
+                message: '🎉 대박! 50% 할인 쿠폰을 획득했습니다!',
+                discountValue: 50
+            },
+            { 
+                icon: '🎉', 
+                text: '축하!', 
+                discount: '30% 할인', 
+                type: 'win',
+                message: '🎉 축하합니다! 30% 할인 쿠폰을 획득했습니다!',
+                discountValue: 30
+            },
+            { 
+                icon: '🎁', 
+                text: '좋아!', 
+                discount: '20% 할인', 
+                type: 'win',
+                message: '🎉 좋습니다! 20% 할인 쿠폰을 획득했습니다!',
+                discountValue: 20
+            },
+            { 
+                icon: '🎫', 
+                text: '괜찮아!', 
+                discount: '10% 할인', 
+                type: 'win',
+                message: '🎉 괜찮습니다! 10% 할인 쿠폰을 획득했습니다!',
+                discountValue: 10
+            },
+            { 
+                icon: '😢', 
+                text: '아쉬워!', 
+                discount: '꽝', 
+                type: 'lose',
+                message: '😢 아쉽게도 꽝입니다. 다시 도전해보세요!',
+                discountValue: 0
+            }
+        ];
+
+        function startScratch() {
+            if (isScratching) return;
+            
+            isScratching = true;
+            isScratched = false;
+            scratchProgress = 0;
+            
+            // 랜덤 상품 선택
+            const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+            
+            // 카드 내용 설정
+            document.getElementById('cardIcon').textContent = randomPrize.icon;
+            document.getElementById('cardText').textContent = randomPrize.text;
+            document.getElementById('cardDiscount').textContent = randomPrize.discount;
+            
+            // 스크래치 이벤트 리스너 추가
+            const scratchArea = document.getElementById('scratchArea');
+            scratchArea.addEventListener('mousemove', handleScratch);
+            scratchArea.addEventListener('mouseleave', stopScratch);
+            scratchArea.addEventListener('mouseup', stopScratch);
+            
+            document.getElementById('scratchBtn').disabled = true;
+            document.getElementById('scratchBtn').textContent = '스크래치 중...';
+            
+            const result = document.getElementById('result');
+            result.textContent = '마우스로 스크래치 영역을 긁어보세요!';
+            result.className = 'result neutral';
+        }
+
+        function handleScratch(e) {
+            if (!isScratching || isScratched) return;
+            
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // 스크래치 효과 생성
+            createScratchEffect(x, y);
+            
+            // 스크래치 진행도 업데이트
+            scratchProgress += 0.5;
+            
+            if (scratchProgress >= scratchThreshold) {
+                revealPrize();
+            }
+        }
+
+        function createScratchEffect(x, y) {
+            const scratchArea = document.getElementById('scratchArea');
+            const effect = document.createElement('div');
+            effect.className = 'scratch-effect';
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            
+            scratchArea.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 1000);
+        }
+
+        function stopScratch() {
+            // 스크래치 이벤트 리스너 제거
+            const scratchArea = document.getElementById('scratchArea');
+            scratchArea.removeEventListener('mousemove', handleScratch);
+            scratchArea.removeEventListener('mouseleave', stopScratch);
+            scratchArea.removeEventListener('mouseup', stopScratch);
+        }
+
+        function revealPrize() {
+            if (isScratched) return;
+            
+            isScratched = true;
+            isScratching = false;
+            
+            // 스크래치 오버레이 제거
+            const overlay = document.getElementById('scratchOverlay');
+            overlay.classList.add('scratched');
+            
+            // 카드 내용 공개
+            const content = document.getElementById('cardContent');
+            content.classList.add('revealed');
+            
+            // 결과 표시
+            const result = document.getElementById('result');
+            const cardText = document.getElementById('cardText').textContent;
+            const cardDiscount = document.getElementById('cardDiscount').textContent;
+            
+            // 상품 타입에 따른 결과 표시
+            const prize = prizes.find(p => p.text === cardText && p.discount === cardDiscount);
+            
+            if (prize) {
+                result.className = `result ${prize.type}`;
+                result.innerHTML = prize.message;
+                
+                if (prize.discountValue > 0) {
+                    result.innerHTML += `<br><br>💳 할인율: <strong>${prize.discountValue}%</strong>`;
+                    
+                    if (prize.type === 'jackpot') {
+                        result.classList.add('jackpot-animation');
+                    }
+                    
+                    // 쿠폰 코드 alert 표시
+                    setTimeout(() => {
+                        const couponCode = generateCouponCode();
+                        alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${prize.discountValue}%`);
+                    }, 1000);
+                }
+            }
+            
+            // 무제한 참여 가능
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            // 무제한 참여 가능
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                startScratch();
+            } else if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 캐치 더 쿠폰</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-area {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            border: 3px solid #dee2e6;
+        }
+
+        .player {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            transition: left 0.1s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .coupon {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .coupon.good {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        .coupon.bad {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .coupon.bonus {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            animation: float 2s ease-in-out infinite, pulse 0.5s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 120px;
+            margin: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timer-display {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 3rem;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.3);
+            border: 3px solid #1a252f;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #6c5ce7, #5f3dc4);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .result.neutral {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 3px solid #ffeaa7;
+            box-shadow: 0 5px 15px rgba(133, 100, 4, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .instructions {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .jackpot-animation {
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(21, 87, 36, 0.4);
+            }
+        }
+
+        .hit-effect {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #28a745;
+            border-radius: 50%;
+            animation: hitPulse 0.5s ease;
+            pointer-events: none;
+        }
+
+        @keyframes hitPulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">🎯 캐치 더 쿠폰</h1>
+        
+        <div class="instructions">
+            <h3>🎯 게임 방법</h3>
+            <p>1. 시작 버튼을 눌러 게임을 시작하세요</p>
+            <p>2. 좌우 화살표 키로 플레이어를 움직이세요</p>
+            <p>3. 좋은 쿠폰(🎫)을 잡고 나쁜 쿠폰(💣)을 피하세요</p>
+            <p>4. 30초 동안 최대한 많은 점수를 획득하세요!</p>
+        </div>
+
+        <div class="timer-display" id="timerDisplay">30.00</div>
+
+        <div class="game-area" id="gameArea">
+            <div class="player" id="player">🎯</div>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">점수</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="caught">0</div>
+                <div class="stat-label">잡은 쿠폰</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="missed">0</div>
+                <div class="stat-label">놓친 쿠폰</div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="control-btn start-btn" id="startBtn" onclick="startGame()">시작</button>
+            <button class="control-btn reset-btn" id="resetBtn" onclick="resetGame()">리셋</button>
+        </div>
+        
+        <div class="result" id="result">
+            캐치 더 쿠폰 게임을 시작하세요! 🎯<br>
+            <small>좌우 화살표 키로 플레이어를 움직이세요!</small>
+        </div>
+    </div>
+
+    <script>
+        let gameTime = 30;
+        let score = 0;
+        let caught = 0;
+        let missed = 0;
+        let isGameRunning = false;
+        let gameInterval = null;
+        let couponInterval = null;
+        let playerPosition = 50; // 플레이어 위치 (퍼센트)
+        let playerElement = null;
+        let gameArea = null;
+
+        const coupons = [
+            { emoji: '🎫', type: 'good', points: 10, text: '10% 쿠폰' },
+            { emoji: '🎁', type: 'good', points: 15, text: '15% 쿠폰' },
+            { emoji: '🏆', type: 'good', points: 20, text: '20% 쿠폰' },
+            { emoji: '💣', type: 'bad', points: -25, text: '폭탄' },
+            { emoji: '💀', type: 'bad', points: -30, text: '해골' },
+            { emoji: '⭐', type: 'bonus', points: 50, text: '보너스' }
+        ];
+
+        function startGame() {
+            if (isGameRunning) return;
+            
+            isGameRunning = true;
+            gameTime = 30;
+            score = 0;
+            caught = 0;
+            missed = 0;
+            
+            playerElement = document.getElementById('player');
+            gameArea = document.getElementById('gameArea');
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = false;
+            
+            const result = document.getElementById('result');
+            result.textContent = '게임이 시작되었습니다! 좌우 화살표 키로 움직이세요!';
+            result.className = 'result neutral';
+            
+            startTimer();
+            startCouponGeneration();
+        }
+
+        function startTimer() {
+            gameInterval = setInterval(() => {
+                gameTime -= 0.01;
+                document.getElementById('timerDisplay').textContent = gameTime.toFixed(2);
+                
+                if (gameTime <= 0) {
+                    endGame();
+                }
+            }, 10);
+        }
+
+        function startCouponGeneration() {
+            couponInterval = setInterval(() => {
+                if (isGameRunning) {
+                    createFallingCoupon();
+                }
+            }, 1000); // 1초마다 쿠폰 생성
+        }
+
+        function createFallingCoupon() {
+            const coupon = coupons[Math.floor(Math.random() * coupons.length)];
+            const couponElement = document.createElement('div');
+            couponElement.className = `coupon ${coupon.type}`;
+            couponElement.textContent = coupon.emoji;
+            couponElement.dataset.points = coupon.points;
+            couponElement.dataset.type = coupon.type;
+            couponElement.title = coupon.text;
+            
+            // 랜덤한 x 위치
+            const x = Math.random() * (gameArea.offsetWidth - 50);
+            couponElement.style.left = x + 'px';
+            couponElement.style.top = '-50px';
+            
+            gameArea.appendChild(couponElement);
+            
+            // 쿠폰이 바닥에 닿았을 때
+            setTimeout(() => {
+                if (couponElement.parentNode) {
+                    couponElement.remove();
+                    if (isGameRunning) {
+                        missed++;
+                        document.getElementById('missed').textContent = missed;
+                    }
+                }
+            }, 4000);
+        }
+
+        function movePlayer(direction) {
+            if (!isGameRunning) return;
+            
+            const step = 5; // 이동 거리
+            if (direction === 'left') {
+                playerPosition = Math.max(0, playerPosition - step);
+            } else if (direction === 'right') {
+                playerPosition = Math.min(100, playerPosition + step);
+            }
+            
+            playerElement.style.left = playerPosition + '%';
+        }
+
+        function checkCollision() {
+            const playerRect = playerElement.getBoundingClientRect();
+            const gameAreaRect = gameArea.getBoundingClientRect();
+            
+            const fallingCoupons = document.querySelectorAll('.coupon');
+            fallingCoupons.forEach(coupon => {
+                const couponRect = coupon.getBoundingClientRect();
+                
+                // 충돌 검사
+                if (couponRect.bottom >= playerRect.top && 
+                    couponRect.top <= playerRect.bottom &&
+                    couponRect.right >= playerRect.left && 
+                    couponRect.left <= playerRect.right) {
+                    
+                    // 충돌 효과
+                    createHitEffect(couponRect.left + couponRect.width / 2, couponRect.top + couponRect.height / 2);
+                    
+                    // 점수 업데이트
+                    const points = parseInt(coupon.dataset.points);
+                    const type = coupon.dataset.type;
+                    
+                    if (type === 'good' || type === 'bonus') {
+                        score += points;
+                        caught++;
+                        document.getElementById('caught').textContent = caught;
+                    } else if (type === 'bad') {
+                        score = Math.max(0, score + points);
+                    }
+                    
+                    document.getElementById('score').textContent = score;
+                    
+                    // 쿠폰 제거
+                    coupon.remove();
+                }
+            });
+        }
+
+        function createHitEffect(x, y) {
+            const effect = document.createElement('div');
+            effect.className = 'hit-effect';
+            effect.style.left = (x - 30) + 'px';
+            effect.style.top = (y - 30) + 'px';
+            
+            gameArea.appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 500);
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(gameInterval);
+            clearInterval(couponInterval);
+            
+            // 남은 쿠폰들 제거
+            const fallingCoupons = document.querySelectorAll('.coupon');
+            fallingCoupons.forEach(coupon => coupon.remove());
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+            
+            const result = document.getElementById('result');
+            
+            if (score >= 500) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 대박! 50% 할인 쿠폰을 획득했습니다!';
+                showCoupon(50);
+                result.classList.add('jackpot-animation');
+            } else if (score >= 300) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 훌륭합니다! 30% 할인 쿠폰을 획득했습니다!';
+                showCoupon(30);
+            } else if (score >= 200) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 좋습니다! 20% 할인 쿠폰을 획득했습니다!';
+                showCoupon(20);
+            } else if (score >= 100) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 괜찮습니다! 10% 할인 쿠폰을 획득했습니다!';
+                showCoupon(10);
+            } else if (score >= 50) {
+                result.className = 'result neutral';
+                result.innerHTML = '😊 아쉽지만 5% 할인 쿠폰을 획득했습니다!';
+                showCoupon(5);
+            } else {
+                result.className = 'result lose';
+                result.innerHTML = '😢 아쉽게도 꽝입니다. 다시 도전해보세요!';
+            }
+            
+            // 무제한 참여 가능
+        }
+
+        function resetGame() {
+            isGameRunning = false;
+            clearInterval(gameInterval);
+            clearInterval(couponInterval);
+            
+            score = 0;
+            caught = 0;
+            missed = 0;
+            playerPosition = 50;
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('caught').textContent = '0';
+            document.getElementById('missed').textContent = '0';
+            document.getElementById('timerDisplay').textContent = '30.00';
+            
+            // 플레이어 위치 초기화
+            if (playerElement) {
+                playerElement.style.left = '50%';
+            }
+            
+            // 남은 쿠폰들 제거
+            const fallingCoupons = document.querySelectorAll('.coupon');
+            fallingCoupons.forEach(coupon => coupon.remove());
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+            
+            const result = document.getElementById('result');
+            result.textContent = '캐치 더 쿠폰 게임을 시작하세요! 🎯';
+            result.className = 'result';
+        }
+
+        function showCoupon(discount) {
+            const result = document.getElementById('result');
+            result.innerHTML += `<br><br>💳 할인율: <strong>${discount}%</strong>`;
+            
+            // 쿠폰 코드 alert 표시
+            setTimeout(() => {
+                const couponCode = generateCouponCode();
+                alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${discount}%`);
+            }, 1000);
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 게임 루프
+        function gameLoop() {
+            if (isGameRunning) {
+                checkCollision();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            gameLoop();
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                movePlayer('left');
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                movePlayer('right');
+            } else if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                if (!isGameRunning) {
+                    startGame();
+                }
+            } else if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

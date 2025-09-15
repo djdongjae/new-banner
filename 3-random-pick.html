@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎁 복불복 뽑기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pick-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .pick-item {
+            width: 120px;
+            height: 120px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .pick-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+        }
+
+        .pick-item.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+            border: 3px solid #ffc107;
+        }
+
+        .pick-item.revealed {
+            transform: scale(1.05);
+            animation: reveal 0.5s ease-in-out;
+        }
+
+        .pick-item.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            border: 3px solid #28a745;
+        }
+
+        .pick-item.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            border: 3px solid #dc3545;
+        }
+
+        .pick-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .pick-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .pick-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pick-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .pick-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .pick-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .prizes-info {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .prizes-info h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .prize-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .prize-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .prize-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .prize-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .prize-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .prize-rate {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes reveal {
+            0% { transform: scale(1) rotateY(0deg); }
+            50% { transform: scale(1.1) rotateY(90deg); }
+            100% { transform: scale(1.05) rotateY(0deg); }
+        }
+
+        .shaking {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .jackpot-animation {
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(21, 87, 36, 0.4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">🎁 복불복 뽑기</h1>
+        
+        <div class="pick-container" id="pickContainer">
+            <div class="pick-item" data-prize="jackpot" onclick="selectItem(this)">
+                <div class="pick-icon">🎁</div>
+                <div class="pick-label">상자 1</div>
+            </div>
+            <div class="pick-item" data-prize="lose" onclick="selectItem(this)">
+                <div class="pick-icon">🎁</div>
+                <div class="pick-label">상자 2</div>
+            </div>
+            <div class="pick-item" data-prize="win" onclick="selectItem(this)">
+                <div class="pick-icon">🎁</div>
+                <div class="pick-label">상자 3</div>
+            </div>
+            <div class="pick-item" data-prize="lose" onclick="selectItem(this)">
+                <div class="pick-icon">🎁</div>
+                <div class="pick-label">상자 4</div>
+            </div>
+            <div class="pick-item" data-prize="win" onclick="selectItem(this)">
+                <div class="pick-icon">🎁</div>
+                <div class="pick-label">상자 5</div>
+            </div>
+        </div>
+
+        <div class="prizes-info">
+            <h3>🎯 상품 정보</h3>
+            <div class="prize-list">
+                <div class="prize-item">
+                    <div class="prize-icon">🏆</div>
+                    <div class="prize-name">대박 상품</div>
+                    <div class="prize-rate">50% 할인 쿠폰</div>
+                </div>
+                <div class="prize-item">
+                    <div class="prize-icon">🎉</div>
+                    <div class="prize-name">축하 상품</div>
+                    <div class="prize-rate">20% 할인 쿠폰</div>
+                </div>
+                <div class="prize-item">
+                    <div class="prize-icon">🎁</div>
+                    <div class="prize-name">일반 상품</div>
+                    <div class="prize-rate">10% 할인 쿠폰</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="pick-btn" id="pickBtn" onclick="pickItem()" disabled>상자를 선택하세요!</button>
+        
+        <div class="result" id="result">
+            상자를 선택하고 뽑기를 시작하세요! 🎁<br>
+            <small>운이 좋으면 대박 상품을 획득할 수 있어요!</small>
+        </div>
+    </div>
+
+    <script>
+        let selectedItem = null;
+        let isPicking = false;
+        
+        const prizes = {
+            jackpot: { 
+                message: '🎉 대박! 50% 할인 쿠폰을 획득했습니다!', 
+                discount: 50,
+                isJackpot: true
+            },
+            win: { 
+                message: '🎉 축하합니다! 20% 할인 쿠폰을 획득했습니다!', 
+                discount: 20,
+                isJackpot: false
+            },
+            lose: { 
+                message: '😢 아쉽게도 꽝입니다. 다시 도전해보세요!', 
+                discount: 0,
+                isJackpot: false
+            }
+        };
+
+        function selectItem(element) {
+            if (isPicking) return;
+            
+            // 이전 선택 해제
+            document.querySelectorAll('.pick-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 새 선택
+            element.classList.add('selected');
+            selectedItem = element;
+            
+            const pickBtn = document.getElementById('pickBtn');
+            pickBtn.disabled = false;
+            pickBtn.textContent = '뽑기 시작!';
+        }
+
+        function pickItem() {
+            if (!selectedItem || isPicking) return;
+            
+            isPicking = true;
+            const pickBtn = document.getElementById('pickBtn');
+            const result = document.getElementById('result');
+            
+            pickBtn.disabled = true;
+            pickBtn.textContent = '뽑는 중...';
+            result.textContent = '상자를 열고 있습니다...';
+            result.className = 'result';
+            
+            // 모든 상자 흔들기 효과
+            document.querySelectorAll('.pick-item').forEach(item => {
+                item.classList.add('shaking');
+            });
+            
+            setTimeout(() => {
+                // 선택된 상자만 계속 흔들기
+                document.querySelectorAll('.pick-item').forEach(item => {
+                    item.classList.remove('shaking');
+                });
+                selectedItem.classList.add('shaking');
+                
+                setTimeout(() => {
+                    revealResult();
+                }, 1000);
+            }, 1500);
+        }
+
+        function revealResult() {
+            const prizeType = selectedItem.dataset.prize;
+            const prize = prizes[prizeType];
+            
+            // 선택된 상자 결과 표시
+            selectedItem.classList.remove('shaking');
+            selectedItem.classList.add('revealed');
+            
+            if (prize.discount > 0) {
+                selectedItem.classList.add('win');
+            } else {
+                selectedItem.classList.add('lose');
+            }
+            
+            // 결과 표시
+            const result = document.getElementById('result');
+            result.className = `result ${prize.discount > 0 ? 'win' : 'lose'}`;
+            result.innerHTML = prize.message;
+            
+            if (prize.discount > 0) {
+                
+                if (prize.isJackpot) {
+                    result.classList.add('jackpot-animation');
+                }
+                
+                // 쿠폰 코드 alert 표시
+                setTimeout(() => {
+                    const couponCode = generateCouponCode();
+                    alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${prize.discount}%`);
+                    
+                    // alert 확인 후 자동으로 새로고침 확인창 표시
+                    setTimeout(() => {
+                        if (confirm('게임을 다시 시작하시겠습니까?\n페이지가 새로고침됩니다.')) {
+                            location.reload();
+                        }
+                    }, 500);
+                }, 1000);
+            } else {
+                // 꽝인 경우에도 자동 새로고침
+                setTimeout(() => {
+                    if (confirm('게임을 다시 시작하시겠습니까?\n페이지가 새로고침됩니다.')) {
+                        location.reload();
+                    }
+                }, 2000);
+            }
+            
+            // 선택한 상자만 결과 표시 (다른 상자들은 공개하지 않음)
+            
+            // 버튼 비활성화 (다시 뽑기 불가)
+            const pickBtn = document.getElementById('pickBtn');
+            pickBtn.disabled = true;
+            pickBtn.textContent = '뽑기 완료!';
+            
+            isPicking = false;
+            
+            // 무제한 참여 가능
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            // 무제한 참여 가능
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && selectedItem && !isPicking) {
+                pickItem();
+            } else if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 슬롯머신</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .slot-machine {
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: inset 0 8px 20px rgba(0,0,0,0.3), 0 10px 30px rgba(0,0,0,0.2);
+            border: 5px solid #1a252f;
+        }
+
+        .reels-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .reel {
+            width: 100px;
+            height: 150px;
+            background: linear-gradient(145deg, #ecf0f1, #bdc3c7);
+            border: 4px solid #95a5a6;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .reel-content {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.1s ease;
+        }
+
+        .symbol {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border-bottom: 2px solid #bdc3c7;
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+        }
+
+        .symbol:nth-child(odd) {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+        }
+
+        .symbol:nth-child(even) {
+            background: linear-gradient(145deg, #e9ecef, #dee2e6);
+        }
+
+        .spin-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .spin-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .result.jackpot {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 3px solid #ffeaa7;
+            box-shadow: 0 5px 15px rgba(133, 100, 4, 0.2);
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .paytable {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .paytable h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .paytable-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 1rem;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .paytable-item:last-child {
+            border-bottom: none;
+        }
+
+        .paytable-symbols {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .paytable-reward {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .spinning {
+            animation: spin 0.1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translateY(0); }
+            to { transform: translateY(-50px); }
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(133, 100, 4, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(133, 100, 4, 0.4);
+            }
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .reel-highlight {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            height: 50px;
+            border: 3px solid #28a745;
+            border-radius: 10px;
+            background: rgba(40, 167, 69, 0.1);
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">🎰 슬롯머신</h1>
+        
+        <div class="slot-machine">
+            <div class="reels-container">
+                <div class="reel">
+                    <div class="reel-content" id="reel1"></div>
+                    <div class="reel-highlight"></div>
+                </div>
+                <div class="reel">
+                    <div class="reel-content" id="reel2"></div>
+                    <div class="reel-highlight"></div>
+                </div>
+                <div class="reel">
+                    <div class="reel-content" id="reel3"></div>
+                    <div class="reel-highlight"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="paytable">
+            <h3>🎯 당첨 규칙</h3>
+            <div class="paytable-item">
+                <span class="paytable-symbols">🍒🍒🍒</span>
+                <span class="paytable-reward">대박! 50% 쿠폰</span>
+            </div>
+            <div class="paytable-item">
+                <span class="paytable-symbols">🍋🍋🍋</span>
+                <span class="paytable-reward">축하! 30% 쿠폰</span>
+            </div>
+            <div class="paytable-item">
+                <span class="paytable-symbols">🍇🍇🍇</span>
+                <span class="paytable-reward">좋아! 20% 쿠폰</span>
+            </div>
+            <div class="paytable-item">
+                <span class="paytable-symbols">🍊🍊🍊</span>
+                <span class="paytable-reward">괜찮아! 10% 쿠폰</span>
+            </div>
+            <div class="paytable-item">
+                <span class="paytable-symbols">같은 과일 2개</span>
+                <span class="paytable-reward">아쉬워! 5% 쿠폰</span>
+            </div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="spinSlots()">슬롯 돌리기!</button>
+        
+        <div class="result" id="result">
+            슬롯을 돌려보세요! 🎰<br>
+            <small>세 개의 릴이 일치하면 대박!</small>
+        </div>
+    </div>
+
+    <script>
+        let isSpinning = false;
+        const symbols = ['🍒', '🍋', '🍇', '🍊', '⭐', '💎'];
+        const payouts = {
+            '🍒🍒🍒': { type: 'jackpot', message: '🎉 대박! 50% 할인 쿠폰을 획득했습니다!', discount: 50 },
+            '🍋🍋🍋': { type: 'win', message: '🎉 축하합니다! 30% 할인 쿠폰을 획득했습니다!', discount: 30 },
+            '🍇🍇🍇': { type: 'win', message: '🎉 좋습니다! 20% 할인 쿠폰을 획득했습니다!', discount: 20 },
+            '🍊🍊🍊': { type: 'win', message: '🎉 괜찮습니다! 10% 할인 쿠폰을 획득했습니다!', discount: 10 }
+        };
+
+        function generateReelContent() {
+            let content = '';
+            for (let i = 0; i < 30; i++) {
+                const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                content += `<div class="symbol">${symbol}</div>`;
+            }
+            return content;
+        }
+
+        function initializeReels() {
+            document.getElementById('reel1').innerHTML = generateReelContent();
+            document.getElementById('reel2').innerHTML = generateReelContent();
+            document.getElementById('reel3').innerHTML = generateReelContent();
+        }
+
+        function spinSlots() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            const result = document.getElementById('result');
+            const reels = ['reel1', 'reel2', 'reel3'];
+            
+            spinBtn.disabled = true;
+            spinBtn.textContent = '돌리는 중...';
+            result.textContent = '슬롯이 돌아가고 있습니다...';
+            result.className = 'result';
+            
+            // 릴들 스피닝 시작
+            reels.forEach(reelId => {
+                const reel = document.getElementById(reelId);
+                reel.classList.add('spinning');
+            });
+            
+            // 각 릴을 순차적으로 멈춤
+            setTimeout(() => stopReel('reel1'), 1200);
+            setTimeout(() => stopReel('reel2'), 1800);
+            setTimeout(() => stopReel('reel3'), 2400);
+            
+            setTimeout(() => {
+                checkResult();
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.textContent = '다시 돌리기!';
+                
+                // 무제한 참여 가능
+            }, 3000);
+        }
+
+        function stopReel(reelId) {
+            const reel = document.getElementById(reelId);
+            reel.classList.remove('spinning');
+            
+            // 결과 심볼을 중앙에 위치시키기 위해 조정
+            const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const symbolDiv = document.createElement('div');
+            symbolDiv.className = 'symbol';
+            symbolDiv.textContent = randomSymbol;
+            symbolDiv.style.position = 'absolute';
+            symbolDiv.style.top = '50px';
+            symbolDiv.style.left = '0';
+            symbolDiv.style.right = '0';
+            symbolDiv.style.height = '50px';
+            symbolDiv.style.background = 'linear-gradient(145deg, #f8f9fa, #e9ecef)';
+            symbolDiv.style.border = '3px solid #28a745';
+            symbolDiv.style.borderRadius = '10px';
+            symbolDiv.style.fontSize = '2.5rem';
+            symbolDiv.style.fontWeight = 'bold';
+            symbolDiv.style.zIndex = '10';
+            symbolDiv.style.boxShadow = '0 3px 10px rgba(0,0,0,0.2)';
+            
+            reel.appendChild(symbolDiv);
+            reel.dataset.result = randomSymbol;
+        }
+
+        function checkResult() {
+            const reel1Result = document.getElementById('reel1').dataset.result;
+            const reel2Result = document.getElementById('reel2').dataset.result;
+            const reel3Result = document.getElementById('reel3').dataset.result;
+            
+            const combination = reel1Result + reel2Result + reel3Result;
+            const result = document.getElementById('result');
+            
+            // 정확히 3개 일치하는 경우
+            if (payouts[combination]) {
+                const payout = payouts[combination];
+                result.className = `result ${payout.type}`;
+                result.innerHTML = payout.message;
+                result.innerHTML += `<br><br>💳 할인율: <strong>${payout.discount}%</strong>`;
+                
+                // 쿠폰 코드 alert 표시
+                setTimeout(() => {
+                    const couponCode = generateCouponCode();
+                    alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${payout.discount}%`);
+                }, 1000);
+            }
+            // 2개 일치하는 경우
+            else if (reel1Result === reel2Result || reel2Result === reel3Result || reel1Result === reel3Result) {
+                result.className = 'result win';
+                result.innerHTML = '🎉 아쉽지만 5% 할인 쿠폰을 획득했습니다!';
+                
+                // 쿠폰 코드 alert 표시
+                setTimeout(() => {
+                    const couponCode = generateCouponCode();
+                    alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: 5%`);
+                }, 1000);
+            }
+            // 모두 다른 경우
+            else {
+                result.className = 'result lose';
+                result.innerHTML = '😢 아쉽게도 꽝입니다. 다시 도전해보세요!';
+            }
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            initializeReels();
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                spinSlots();
+            } else if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

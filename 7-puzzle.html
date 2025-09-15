@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧩 간단 퍼즐</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin: 30px auto;
+            width: 300px;
+            height: 300px;
+            background: #2c3e50;
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .puzzle-piece {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: 2px solid #1a252f;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .puzzle-piece.empty {
+            background: transparent;
+            border: 2px dashed #7f8c8d;
+            cursor: default;
+        }
+
+        .puzzle-piece.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .puzzle-piece.correct {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            animation: correctPulse 0.5s ease;
+        }
+
+        .puzzle-piece.incorrect {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            animation: shake 0.5s ease;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 120px;
+            margin: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .shuffle-btn {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #6c5ce7, #5f3dc4);
+            color: white;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .result.neutral {
+            background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 3px solid #ffeaa7;
+            box-shadow: 0 5px 15px rgba(133, 100, 4, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .instructions {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .pulse {
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .jackpot-animation {
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(21, 87, 36, 0.4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">🧩 간단 퍼즐</h1>
+        
+        <div class="instructions">
+            <h3>🎯 게임 방법</h3>
+            <p>1. 숫자를 1부터 8까지 순서대로 배열하세요</p>
+            <p>2. 빈 칸(9번 위치)을 이용해 퍼즐을 완성하세요</p>
+            <p>3. 최소한의 이동으로 완성할수록 높은 점수를 획득합니다</p>
+            <p>4. 셔플 버튼으로 새로운 퍼즐을 시작할 수 있어요</p>
+        </div>
+
+        <div class="puzzle-container" id="puzzleContainer">
+            <!-- 퍼즐 조각들이 여기에 동적으로 생성됩니다 -->
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="moves">0</div>
+                <div class="stat-label">이동 횟수</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="time">00:00</div>
+                <div class="stat-label">시간</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">점수</div>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button class="control-btn shuffle-btn" id="shuffleBtn" onclick="shufflePuzzle()">셔플</button>
+        </div>
+        
+        <div class="result" id="result">
+            퍼즐을 완성해보세요! 🧩<br>
+        </div>
+    </div>
+
+    <script>
+        let puzzle = [1, 2, 3, 4, 5, 6, 7, 8, 0]; // 0은 빈 칸
+        let moves = 0;
+        let startTime = 0;
+        let gameTimer = null;
+        let isGameComplete = false;
+        let isGameStarted = false;
+
+        function createPuzzle() {
+            const container = document.getElementById('puzzleContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.dataset.index = i;
+                
+                if (puzzle[i] === 0) {
+                    piece.classList.add('empty');
+                    piece.textContent = '';
+                } else {
+                    piece.textContent = puzzle[i];
+                    piece.onclick = () => movePiece(i);
+                }
+                
+                container.appendChild(piece);
+            }
+        }
+
+        function movePiece(index) {
+            if (isGameComplete || !isGameStarted) return;
+            
+            const emptyIndex = puzzle.indexOf(0);
+            const row = Math.floor(index / 3);
+            const col = index % 3;
+            const emptyRow = Math.floor(emptyIndex / 3);
+            const emptyCol = emptyIndex % 3;
+            
+            // 인접한 칸인지 확인
+            const isAdjacent = (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
+                              (Math.abs(col - emptyCol) === 1 && row === emptyRow);
+            
+            if (isAdjacent) {
+                // 이동
+                puzzle[emptyIndex] = puzzle[index];
+                puzzle[index] = 0;
+                moves++;
+                
+                document.getElementById('moves').textContent = moves;
+                updateScore();
+                
+                createPuzzle();
+                checkWin();
+            } else {
+                // 잘못된 이동
+                const piece = document.querySelector(`[data-index="${index}"]`);
+                piece.classList.add('incorrect');
+                setTimeout(() => {
+                    piece.classList.remove('incorrect');
+                }, 500);
+            }
+        }
+
+        function shufflePuzzle() {
+            if (isGameComplete) return;
+            
+            isGameStarted = true;
+            
+            // Fisher-Yates 셔플 알고리즘
+            for (let i = puzzle.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [puzzle[i], puzzle[j]] = [puzzle[j], puzzle[i]];
+            }
+            
+            // 해결 가능한 상태인지 확인 (홀수/짝수 순열)
+            let inversions = 0;
+            for (let i = 0; i < puzzle.length - 1; i++) {
+                for (let j = i + 1; j < puzzle.length; j++) {
+                    if (puzzle[i] > puzzle[j] && puzzle[i] !== 0 && puzzle[j] !== 0) {
+                        inversions++;
+                    }
+                }
+            }
+            
+            // 홀수 순열이면 다시 셔플
+            if (inversions % 2 === 1) {
+                shufflePuzzle();
+                return;
+            }
+            
+            moves = 0;
+            startTime = Date.now();
+            isGameComplete = false;
+            
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('time').textContent = '00:00';
+            document.getElementById('score').textContent = '0';
+            
+            createPuzzle();
+            startTimer();
+            
+            const result = document.getElementById('result');
+            result.textContent = '새로운 퍼즐이 시작되었습니다! 🧩';
+            result.className = 'result neutral';
+        }
+
+        function resetPuzzle() {
+            puzzle = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+            moves = 0;
+            startTime = 0;
+            isGameComplete = false;
+            isGameStarted = false;
+            
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+            
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('time').textContent = '00:00';
+            document.getElementById('score').textContent = '0';
+            
+            createPuzzle();
+            
+            const result = document.getElementById('result');
+            result.textContent = '퍼즐을 완성해보세요! 🧩';
+            result.className = 'result';
+        }
+
+        function startTimer() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+            
+            startTime = Date.now();
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('time').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                updateScore();
+            }, 1000);
+        }
+
+        function updateScore() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const timeBonus = Math.max(0, 300 - elapsed); // 5분에서 시간당 감점
+            const moveBonus = Math.max(0, 100 - moves); // 100회에서 이동당 감점
+            const score = Math.max(0, timeBonus + moveBonus);
+            
+            document.getElementById('score').textContent = score;
+        }
+
+        function checkWin() {
+            const isWin = puzzle.slice(0, 8).every((value, index) => value === index + 1) && puzzle[8] === 0;
+            
+            if (isWin) {
+                isGameComplete = true;
+                isGameStarted = false;
+                if (gameTimer) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                }
+                
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const finalScore = parseInt(document.getElementById('score').textContent);
+                
+                const result = document.getElementById('result');
+                
+                if (finalScore >= 200) {
+                    result.className = 'result win';
+                    result.innerHTML = '🎉 완벽합니다! 50% 할인 쿠폰을 획득했습니다!';
+                    showCoupon(50);
+                    result.classList.add('jackpot-animation');
+                } else if (finalScore >= 150) {
+                    result.className = 'result win';
+                    result.innerHTML = '🎉 훌륭합니다! 30% 할인 쿠폰을 획득했습니다!';
+                    showCoupon(30);
+                } else if (finalScore >= 100) {
+                    result.className = 'result win';
+                    result.innerHTML = '🎉 좋습니다! 20% 할인 쿠폰을 획득했습니다!';
+                    showCoupon(20);
+                } else if (finalScore >= 50) {
+                    result.className = 'result win';
+                    result.innerHTML = '🎉 괜찮습니다! 10% 할인 쿠폰을 획득했습니다!';
+                    showCoupon(10);
+                } else {
+                    result.className = 'result neutral';
+                    result.innerHTML = '😊 아쉽지만 5% 할인 쿠폰을 획득했습니다!';
+                    showCoupon(5);
+                }
+                
+                // 무제한 참여 가능
+            }
+        }
+
+        function showCoupon(discount) {
+            const result = document.getElementById('result');            
+            // 쿠폰 코드 alert 표시
+            setTimeout(() => {
+                const couponCode = generateCouponCode();
+                alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${discount}%`);
+                location.reload();
+            }, 1000);
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            createPuzzle();
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

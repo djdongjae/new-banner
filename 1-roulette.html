@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 룰렛 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .roulette-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 40px auto;
+        }
+
+        .roulette {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            border: 10px solid #2c3e50;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .roulette-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 1.2rem;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .roulette-section:nth-child(1) { 
+            background: linear-gradient(45deg, #e74c3c, #c0392b); 
+            transform: rotate(60deg); 
+        }   
+        .roulette-section:nth-child(2) { 
+            background: linear-gradient(45deg, #f39c12, #e67e22); 
+            transform: rotate(120deg); 
+        }
+        .roulette-section:nth-child(3) { 
+            background: linear-gradient(45deg, #3498db, #2980b9); 
+            transform: rotate(180deg); 
+        }
+        .roulette-section:nth-child(4) { 
+            background: linear-gradient(45deg, #e74c3c, #c0392b); 
+            transform: rotate(240deg); 
+        }
+        .roulette-section:nth-child(5) { 
+            background: linear-gradient(45deg, #f39c12, #e67e22); 
+            transform: rotate(300deg); 
+        }
+        .roulette-section:nth-child(6) { 
+            background: linear-gradient(45deg, #3498db, #2980b9); 
+            transform: rotate(360deg); 
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 50px solid #2c3e50;
+            z-index: 11;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+        }
+
+        .spin-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 25px 50px;
+            font-size: 1.6rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .spin-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.5;
+        }
+
+        .result.win {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 3px solid #c3e6cb;
+            box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+        }
+
+        .result.lose {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 3px solid #f5c6cb;
+            box-shadow: 0 5px 15px rgba(114, 28, 36, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .prizes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .prize-item {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .prize-item.highlight {
+            border-color: #ff6b6b;
+            background: linear-gradient(45deg, #fff5f5, #ffe0e0);
+            transform: scale(1.05);
+        }
+
+        .jackpot-animation {
+            animation: jackpot 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes jackpot {
+            from { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(21, 87, 36, 0.2);
+            }
+            to { 
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(21, 87, 36, 0.4);
+            }
+        }
+
+        .spinning {
+            animation: spin 0.1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .coupon-code {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="location.href='index.html'">← 홈으로</button>
+    
+    <div class="game-container">
+        <h1 class="title">🎯 룰렛 게임</h1>
+        
+        <div class="roulette-container">
+            <div class="roulette" id="roulette">
+                <div class="roulette-section"></div>
+                <div class="roulette-section"></div>
+                <div class="roulette-section"></div>
+                <div class="roulette-section"></div>
+                <div class="roulette-section"></div>
+                <div class="roulette-section"></div>
+            </div>
+            <div class="center-circle"></div>
+            <div class="pointer"></div>
+        </div>
+
+        <div class="prizes">
+            <div class="prize-item" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;">🔴 10% 할인</div>
+            <div class="prize-item" style="background: linear-gradient(45deg, #f39c12, #e67e22); color: white;">🟡 20% 할인</div>
+            <div class="prize-item" style="background: linear-gradient(45deg, #3498db, #2980b9); color: white;">🔵 30% 할인</div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="spinRoulette()">룰렛 돌리기!</button>
+        
+        <div class="result" id="result">
+            룰렛을 돌려보세요! 🎯<br>
+        </div>
+    </div>
+
+    <script>
+        let isSpinning = false;
+        // 색상별 할인율: 빨간색(10%), 노란색(20%), 파란색(30%)
+        const prizeDetails = [
+            { 
+                message: '🎉 축하합니다! 10% 할인 쿠폰을 획득했습니다!', 
+                discount: 10,
+                isJackpot: false,
+                color: 'red'
+            },
+            { 
+                message: '🎉 축하합니다! 20% 할인 쿠폰을 획득했습니다!', 
+                discount: 20,
+                isJackpot: false,
+                color: 'yellow'
+            },
+            { 
+                message: '🎉 대박! 30% 할인 쿠폰을 획득했습니다!', 
+                discount: 30,
+                isJackpot: true,
+                color: 'blue'
+            },
+            { 
+                message: '🎉 축하합니다! 10% 할인 쿠폰을 획득했습니다!', 
+                discount: 10,
+                isJackpot: false,
+                color: 'red'
+            },
+            { 
+                message: '🎉 축하합니다! 20% 할인 쿠폰을 획득했습니다!', 
+                discount: 20,
+                isJackpot: false,
+                color: 'yellow'
+            },
+            { 
+                message: '🎉 대박! 30% 할인 쿠폰을 획득했습니다!', 
+                discount: 30,
+                isJackpot: true,
+                color: 'blue'
+            }
+        ];
+
+        function spinRoulette() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            const result = document.getElementById('result');
+            const roulette = document.getElementById('roulette');
+            
+            spinBtn.disabled = true;
+            spinBtn.textContent = '돌리는 중...';
+            result.textContent = '룰렛이 돌아가고 있습니다...';
+            result.className = 'result';
+            
+            // 랜덤한 회전 각도 (최소 6바퀴 + 랜덤) - 더 빠르고 화끈하게!
+            const randomSpins = 6 + Math.random() * 4;
+            const randomAngle = randomSpins * 360 + Math.random() * 360;
+            
+            roulette.style.transform = `rotate(${randomAngle}deg)`;
+            
+            setTimeout(() => {
+                // 결과 계산 (60도씩 6개 구간)
+                const normalizedAngle = (randomAngle % 360);
+                const sectionIndex = Math.floor(normalizedAngle / 60);
+                const finalIndex = (6 - sectionIndex) % 6; // 포인터 위치에 맞게 조정
+                
+                const prize = prizeDetails[finalIndex];
+                result.className = `result win`;
+                result.innerHTML = prize.message;
+                
+                // 당첨 시 쿠폰 코드 alert로 표시
+                const couponCode = generateCouponCode();
+                // result.innerHTML += `<br><br>💳 할인율: <strong>${prize.discount}%</strong>`;
+                
+                if (prize.isJackpot) {
+                    result.classList.add('jackpot-animation');
+                }
+                
+                // 쿠폰 코드 alert 표시
+                setTimeout(() => {
+                    alert(`🎉 축하합니다!\n\n🎫 쿠폰 코드: ${couponCode}\n💳 할인율: ${prize.discount}%`);
+                    location.reload();
+                    // alert 확인 후 자동으로 새로고침 확인창 표시
+                    setTimeout(() => {
+                        if (confirm('게임을 다시 시작하시겠습니까?\n페이지가 새로고침됩니다.')) {
+                            location.reload();
+                        }
+                    }, 500);
+                }, 1000);
+                
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.textContent = '룰렛 돌리기!';
+                
+                // 무제한 참여 가능
+                
+            }, 2000);
+        }
+
+        function generateCouponCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function refreshPage() {
+            if (confirm('페이지를 새로고침하시겠습니까?\n현재 게임 진행 상황이 초기화됩니다.')) {
+                location.reload();
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            // 무제한 참여 가능
+        });
+
+        // 키보드 지원
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                spinRoulette();
+            } else if (e.key === 'Escape') {
+                location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
